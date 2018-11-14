@@ -28,6 +28,21 @@ determine_filetype_and_download(){
 }
 
 main(){
+  mkdir -p "$1" "$2"
+  build=$(cd "$1/" && pwd)
+  cache=$(cd "$2/" && pwd)
+  env_dir="$3"
+
+  # Generate the .profile.d script
+  mkdir -p "$build/.profile.d"
+  app_dir="\$HOME" # the app dir on a dyno
+  if [[ $(uname) == "Darwin" ]]; then
+    # the app dir on a developer's Mac
+    app_dir=$build
+  fi
+
+  mkdir -p "$app_dir/bin"
+
   echo "-----> Found a .vendor_urls file"
 
   # Bail early but noisily
@@ -36,7 +51,7 @@ main(){
     exit 0
   fi
 
-  cd "$1" || exit 1
+  cd "$app_dir/bin" || exit 1
 
   while read -r url; do
     if [ -n "$url" ]; then # incase ensure_newline_at_eof_on_save is enabled
@@ -45,6 +60,8 @@ main(){
       determine_filetype_and_download "$url"
     fi
   done < .vendor_urls
+
+  echo "PATH=\$PATH:$app_dir/bin" > "$build/.profile.d/vendorbin.sh"
 }
 
 main "$@"
