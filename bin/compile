@@ -8,31 +8,43 @@ indent() {
 
 curl_into_tar(){
   local url="$1"
-  local flag="$2"
-  curl -L --silent "$url" | tar $flag
+  local flags="$2"
+  curl -L --silent "$url" | tar $flags -
 }
 
-echo "-----> Found a .vendor_urls file"
+determine_filetype_and_download(){
+  set -x
+  local url="$1"
+  filename="$(echo "$url" | awk -F "/" '{print $NF}')"
+  case "$filename" in
+    *.tar.gz) curl_into_tar "$url" "-xzf" ;;
+    *.gz) curl_into_tar "$url" "-xzf" ;;
+    *.xz) curl_into_tar "$url" "x --xz" ;;
+    *.bz2) curl_into_tar "$url" "x --bzip2" ;;
+    *.tar) curl_into_tar "$url" "" ;;
+    *) wget "$url"
+  esac
+  set +x
+}
 
-# Bail early but noisily
-if [ ! -s "$1/.vendor_urls" ]; then
-  echo ".vendor_urls empty. Skipping." | indent
-  exit 0
-fi
+main(){
+  echo "-----> Found a .vendor_urls file"
 
-cd "$1" || exit 1
-
-while read -r url; do
-  if [ -n "$url" ]; then # incase ensure_newline_at_eof_on_save is enabled
-    echo "Vendoring $url" | indent
-
-    extension="${url##*.}" # http://stackoverflow.com/q/965053
-    case "$extension" in
-      gz) curl_into_tar "$url" "-xvf -" ;;
-      xz) curl_into_tar "$url" "x --xz" ;;
-      bz2) curl_into_tar "$url" "x --bzip2" ;;
-      tar) curl_into_tar "$url" "" ;;
-      *) wget "$url"
-    esac
+  # Bail early but noisily
+  if [ ! -s "$1/.vendor_urls" ]; then
+    echo ".vendor_urls empty. Skipping." | indent
+    exit 0
   fi
-done < .vendor_urls
+
+  cd "$1" || exit 1
+
+  while read -r url; do
+    if [ -n "$url" ]; then # incase ensure_newline_at_eof_on_save is enabled
+      echo "Vendoring $url" | indent
+
+      determine_filetype_and_download "$url"
+    fi
+  done < .vendor_urls
+}
+
+main "$@"
