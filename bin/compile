@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eou pipefail
+set -x
 
 indent() {
   sed -u 's/^/       /'
@@ -42,13 +43,13 @@ main(){
 
   mkdir -p "$app_dir/bin"
 
-  echo "-----> Found a .vendor_urls file"
-
   # Bail early but noisily
   if [ ! -s "$build/.vendor_urls" ]; then
     echo ".vendor_urls empty. Skipping." | indent
     exit 0
   fi
+
+  echo "-----> Found a .vendor_urls file"
 
   cd "$app_dir/bin" || exit 1
 
