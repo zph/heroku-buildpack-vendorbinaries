@@ -28,7 +28,7 @@ while read -r url; do
 
     extension="${url##*.}" # http://stackoverflow.com/q/965053
     case "$extension" in
-      gz) curl_into_tar "$url" "-xzf" ;;
+      gz) curl_into_tar "$url" "-xvf -" ;;
       xz) curl_into_tar "$url" "x --xz" ;;
       bz2) curl_into_tar "$url" "x --bzip2" ;;
       tar) curl_into_tar "$url" "" ;;
