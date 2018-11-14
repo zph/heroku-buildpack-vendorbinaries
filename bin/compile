@@ -28,7 +28,6 @@ determine_filetype_and_download(){
 }
 
 main(){
-  mkdir -p "$1" "$2"
   build=$(cd "$1/" && pwd)
   cache=$(cd "$2/" && pwd)
   env_dir="$3"
@@ -46,7 +45,7 @@ main(){
   echo "-----> Found a .vendor_urls file"
 
   # Bail early but noisily
-  if [ ! -s "$1/.vendor_urls" ]; then
+  if [ ! -s "$build/.vendor_urls" ]; then
     echo ".vendor_urls empty. Skipping." | indent
     exit 0
   fi
