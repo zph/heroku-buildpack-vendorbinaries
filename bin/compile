@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -eou pipefail
-set -x
 
 indent() {
   sed -u 's/^/       /'
@@ -59,7 +58,7 @@ main(){
 
       determine_filetype_and_download "$url"
     fi
-  done < .vendor_urls
+  done < "$build/.vendor_urls"
 
   echo "PATH=\$PATH:$app_dir/bin" > "$build/.profile.d/vendorbin.sh"
 }
