@@ -5,27 +5,33 @@ indent() {
   sed -u 's/^/       /'
 }
 
+curl_into_tar(){
+  local url="$1"
+  local flag="$2"
+  curl -L --silent "$url" | tar x $flag
+}
+
 echo "-----> Found a .vendor_urls file"
 
 # Bail early but noisily
-if [ ! -s $1/.vendor_urls ]; then
+if [ ! -s "$1/.vendor_urls" ]; then
   echo ".vendor_urls empty. Skipping." | indent
   exit 0
 fi
 
-cd $1
+cd "$1" || exit 1
 
-while read url; do
+while read -r url; do
   if [ -n "$url" ]; then # incase ensure_newline_at_eof_on_save is enabled
-    echo Vendoring $url | indent
+    echo "Vendoring $url" | indent
 
     extension="${url##*.}" # http://stackoverflow.com/q/965053
-    flag="-z" # by default use gz
-    if [ "$extension" == "xz" ]; then flag="--xz"
-    elif [ "$extension" == "bz2" ]; then flag="--bzip2"
-    elif [ "$extension" == "tar" ]; then flag=""  # no compression
-    fi
-
-    curl -L --silent $url | tar x $flag
+    case "$extension" in
+      gz) curl_into_tar "$url" "-z" ;;
+      xz) curl_into_tar "$url" "--xz" ;;
+      bz2) curl_into_tar "$url" "--bzip2" ;;
+      tar) curl_into_tar "$url" "" ;;
+      *) wget "$url"
+    esac
   fi
 done < .vendor_urls
