@@ -40,7 +40,7 @@ main(){
     app_dir=$build
   fi
 
-  mkdir -p "$app_dir/bin"
+  mkdir -p "$build/bin"
 
   # Bail early but noisily
   if [ ! -s "$build/.vendor_urls" ]; then
@@ -50,7 +50,7 @@ main(){
 
   echo "-----> Found a .vendor_urls file"
 
-  cd "$app_dir/bin" || exit 1
+  cd "$build/bin" || exit 1
 
   while read -r url; do
     if [ -n "$url" ]; then # incase ensure_newline_at_eof_on_save is enabled
