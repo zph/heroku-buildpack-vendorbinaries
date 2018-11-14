@@ -9,7 +9,7 @@ indent() {
 curl_into_tar(){
   local url="$1"
   local flag="$2"
-  curl -L --silent "$url" | tar x $flag
+  curl -L --silent "$url" | tar $flag
 }
 
 echo "-----> Found a .vendor_urls file"
@@ -28,9 +28,9 @@ while read -r url; do
 
     extension="${url##*.}" # http://stackoverflow.com/q/965053
     case "$extension" in
-      gz) curl_into_tar "$url" "-z" ;;
-      xz) curl_into_tar "$url" "--xz" ;;
-      bz2) curl_into_tar "$url" "--bzip2" ;;
+      gz) curl_into_tar "$url" "-xzf" ;;
+      xz) curl_into_tar "$url" "x --xz" ;;
+      bz2) curl_into_tar "$url" "x --bzip2" ;;
       tar) curl_into_tar "$url" "" ;;
       *) wget "$url"
     esac
